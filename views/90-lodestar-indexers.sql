@@ -220,13 +220,12 @@ rewards AS (
     UNION ALL SELECT LOWER(indexer), CAST(amount AS HUGEINT) FROM rewards__horizon_rewards_assigned
   ) GROUP BY 1
 ),
--- Query fees. Three mechanisms across the protocol's life: `AllocationCollected` (oldest, gross of
--- curation), `RebateCollected.queryFees` (the rebate era), and the subgraph service's
--- `QueryFeesCollected.tokensCollected`. Summed; if the subgraph's `queryFeesCollected` turns out to
--- net curation fees off the first, the parity run will show a constant offset on old indexers.
+-- Query fees, the indexer's net across three mechanisms: `AllocationCollected.rebateFees` (oldest; its
+-- `tokens` is gross of both curation and the protocol tax, which read 17 indexers high),
+-- `RebateCollected.queryFees` (the rebate era), and the subgraph service's `QueryFeesCollected`.
 fees AS (
   SELECT sp, SUM(t) AS query_fees_collected FROM (
-    SELECT LOWER(indexer) AS sp, CAST(tokens AS HUGEINT) - CAST("curationFees" AS HUGEINT) AS t FROM staking_legacy__allocation_collected
+    SELECT LOWER(indexer) AS sp, CAST("rebateFees" AS HUGEINT) AS t FROM staking_legacy__allocation_collected
     UNION ALL SELECT LOWER(indexer), CAST("queryFees" AS HUGEINT) FROM staking_legacy__rebate_collected
     -- net of the curators' share and the 1% protocol cut, the subgraph's figure (gross read 3.5% high)
     UNION ALL SELECT LOWER("serviceProvider"), CAST("tokensCollected" AS HUGEINT) - CAST("tokensCurators" AS HUGEINT) - (CAST("tokensCollected" AS HUGEINT) // 100) FROM subgraph_service__query_fees_collected
@@ -507,7 +506,7 @@ dep_signal AS (
 dep_fees AS (SELECT dep, SUM(t) AS query_fees_amount FROM (
   SELECT "subgraphDeploymentId" AS dep, CAST("tokensCollected" AS HUGEINT) - CAST("tokensCurators" AS HUGEINT) - (CAST("tokensCollected" AS HUGEINT) // 100) AS t FROM subgraph_service__query_fees_collected
   UNION ALL SELECT "subgraphDeploymentID", CAST("queryFees" AS HUGEINT) FROM staking_legacy__rebate_collected
-  UNION ALL SELECT "subgraphDeploymentID", CAST(tokens AS HUGEINT) - CAST("curationFees" AS HUGEINT) FROM staking_legacy__allocation_collected
+  UNION ALL SELECT "subgraphDeploymentID", CAST("rebateFees" AS HUGEINT) FROM staking_legacy__allocation_collected
 ) GROUP BY 1),
 dep_stake AS (SELECT subgraph_deployment AS dep, SUM(allocated_tokens) AS staked_tokens FROM lodestar_allocations WHERE status = 'Active' GROUP BY 1)
 SELECT p.curator || '-' || CAST(p.dep AS VARCHAR)   AS id,

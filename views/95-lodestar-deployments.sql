@@ -28,7 +28,7 @@ fees AS (
   SELECT dep, SUM(t) AS query_fees_amount FROM (
     SELECT LOWER("subgraphDeploymentId") AS dep, CAST("tokensCollected" AS HUGEINT) - CAST("tokensCurators" AS HUGEINT) - (CAST("tokensCollected" AS HUGEINT) // 100) AS t FROM subgraph_service__query_fees_collected
     UNION ALL SELECT LOWER("subgraphDeploymentID"), CAST("queryFees" AS HUGEINT) FROM staking_legacy__rebate_collected
-    UNION ALL SELECT LOWER("subgraphDeploymentID"), CAST(tokens AS HUGEINT) - CAST("curationFees" AS HUGEINT) FROM staking_legacy__allocation_collected
+    UNION ALL SELECT LOWER("subgraphDeploymentID"), CAST("rebateFees" AS HUGEINT) FROM staking_legacy__allocation_collected
   ) GROUP BY 1
 ),
 allocs AS (
