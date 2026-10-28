@@ -62,7 +62,7 @@ fees AS (
   SELECT id, SUM(t) AS query_fees_collected FROM (
     SELECT "allocationId" AS id, CAST("tokensCollected" AS HUGEINT) - CAST("tokensCurators" AS HUGEINT) - (CAST("tokensCollected" AS HUGEINT) // 100) AS t FROM subgraph_service__query_fees_collected
     UNION ALL SELECT "allocationID", CAST("queryFees" AS HUGEINT) FROM staking_legacy__rebate_collected
-    UNION ALL SELECT "allocationID", CAST(tokens AS HUGEINT) - CAST("curationFees" AS HUGEINT) FROM staking_legacy__allocation_collected
+    UNION ALL SELECT "allocationID", CAST("rebateFees" AS HUGEINT) FROM staking_legacy__allocation_collected
   ) GROUP BY 1
 ),
 -- The subgraph's `subgraphDeployment.signalledTokens`, exactly: what a curator paid in **net of

@@ -112,9 +112,13 @@ curator_positions AS (
   ) GROUP BY 1, 2
 ),
 signalled AS (
+  -- What the curation pools hold, as 40, 90 and 95 already count it per deployment: the tax is
+  -- burned on the way in and curators' query-fee share is paid in by `Collected`. Without both this
+  -- sat 1.5M GRT under the network subgraph's totalTokensSignalled; with them it agrees to the wei.
   SELECT (SELECT SUM(t) FROM (
-            SELECT CAST(tokens AS HUGEINT) AS t FROM curation__signalled
+            SELECT CAST(tokens AS HUGEINT) - CAST("curationTax" AS HUGEINT) AS t FROM curation__signalled
             UNION ALL SELECT -CAST(tokens AS HUGEINT) FROM curation__burned
+            UNION ALL SELECT CAST(tokens AS HUGEINT) FROM curation__collected
           )) AS total,
          (SELECT COUNT(DISTINCT curator) FROM curator_positions) AS n_all,
          (SELECT COUNT(DISTINCT curator) FROM curator_positions WHERE net > 0) AS n_positive

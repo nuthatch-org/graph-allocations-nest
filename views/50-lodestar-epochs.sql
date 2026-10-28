@@ -122,13 +122,14 @@ rewards AS (
 -- required: DuckDB's `/` returns a DOUBLE and loses precision outright at 1e23.
 -- Measured over the 175 closed epochs from 1195 up, this took exact agreement from 0 to 145.
 -- Both eras: legacy `RebateCollected.queryFees` is already the indexer's net and `curationFees` the
--- curators'; the pre-rebate `AllocationCollected` likewise less its `curationFees`.
+-- curators'; the pre-rebate `AllocationCollected` gives the same net as `rebateFees` (its `tokens` also
+-- carries the protocol tax, which read 114 early epochs about 1% high).
 fees AS (
   SELECT b.epoch, SUM(q.net) AS query_fees_collected, SUM(q.curators) AS curator_query_fees
   FROM (
     SELECT block_number, CAST("tokensCollected" AS HUGEINT) - CAST("tokensCurators" AS HUGEINT) - (CAST("tokensCollected" AS HUGEINT) // 100) AS net, CAST("tokensCurators" AS HUGEINT) AS curators FROM subgraph_service__query_fees_collected
     UNION ALL SELECT block_number, CAST("queryFees" AS HUGEINT), CAST("curationFees" AS HUGEINT) FROM staking_legacy__rebate_collected
-    UNION ALL SELECT block_number, CAST(tokens AS HUGEINT) - CAST("curationFees" AS HUGEINT), CAST("curationFees" AS HUGEINT) FROM staking_legacy__allocation_collected
+    UNION ALL SELECT block_number, CAST("rebateFees" AS HUGEINT), CAST("curationFees" AS HUGEINT) FROM staking_legacy__allocation_collected
   ) q
   JOIN epoch_boundaries b
     ON q.block_number >= b.start_block AND q.block_number <= b.until_block
