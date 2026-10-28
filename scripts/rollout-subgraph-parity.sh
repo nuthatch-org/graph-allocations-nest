@@ -14,13 +14,14 @@ NEST=/opt/nuthatch/graph-allocations-nest-next
 PORT=8107
 SUBGRAPH=https://subgraphs.graphops.xyz/v1/subgraphId/DZz4kDTdmzWLWsV373w2bSmoar3umKKH9y82SUKr5qmp
 # installed path, source in this repo, production's current sha256, the replacement's sha256.
-# Production runs the epoch-starts rollout's 50, so its replacement is that file with the same fix.
+# Production runs its own 50 and 95 (portable epochs, and 95 from before the denylist), so their
+# replacements are production's files with the same one-line fix, kept in scripts/production/.
 FILES=(
   views/40-lodestar-allocations.sql views/40-lodestar-allocations.sql d21f71e601de00360679247ae87ccef3d46819c0587a284241cc608198681f68 53401554a6a7c10c6da20f05a150549e9e7141f37d6a8a2da5937466ffe623a3
-  views/50-lodestar-epochs.sql scripts/production/50-lodestar-epochs.sql 283d7a11d2acba5cf92f54f0772f4492709b409df793d09f556ac1b6d6aa86f3 bfd9cc1fcd77b3da303a1559ed8fffeeb8320400c0425eaa0de088dc56ed5aa2
+  views/50-lodestar-epochs.sql scripts/production/50-lodestar-epochs.sql 491e9ffb0e3f5e4abe01b82130146808cd46ed990cdbacbb23e1d72dcdd8b6a3 5734cd2687af50a3883d16a3e96d6aeb7e44a746971e47a893ff1539b34d7d31
   views/90-lodestar-indexers.sql views/90-lodestar-indexers.sql 4b7d418171b73ff6c6ab9cc14cf5c368520552108e47122437a14f1d14f33153 0b65cbe8b402eff59054caaa1ca21ed172d8de64808ce51fd95e914cff5aff99
   views/91-lodestar-network.sql views/91-lodestar-network.sql 739229baa48d885d93dd347bda2d3bdf2a0535f0f3c915a19d3e8157e24bfc4e 413b60d2d0c5b9d72c3fa0a582e3df7b9dff2bc993774d388663348e67ac3214
-  views/95-lodestar-deployments.sql views/95-lodestar-deployments.sql a9824af3d8b94b3d52f35fe809adcd0c3e5e810f1025f03c37e5cd5ffe435500 9bf89df8c26bfb05f4ffca9d5ced0b7e93d2612307232b84db7f6b8905a108e8
+  views/95-lodestar-deployments.sql scripts/production/95-lodestar-deployments.sql 6d7614bb894ee3dda46277a4d1b89ba6a60fa110f6c70c9f5fac5d8dfb3b2403 3dd9ce9a133f3dd73ad47e51627d555c991c40c7c27beae979cadf03a3f570ac
 )
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
