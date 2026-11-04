@@ -1,6 +1,6 @@
 -- One row per indexer, deployment and UTC day: indexing rewards split between the indexer and its
 -- delegators, and query fees taken apart the way the contracts took them. The definition behind
--- Lodestar's P&L and Daily Trends (nuthatch-org/lodestar#228); `lodestar_indexer_daily` is its sum.
+-- Lodestar's P&L and Daily Trends (nightswatchhq/lodestar#228); `lodestar_indexer_daily` is its sum.
 --
 -- Dated by the event that paid, never by allocation close: Horizon collects on every POI, so an
 -- allocation can be paid for months before it closes, and a close-dated series books it all on one day.

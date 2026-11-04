@@ -6,7 +6,7 @@ It exists to answer one question: **which subgraph deployments have curation sig
 and no indexer serving them?** Someone paid to have that data produced and nobody is producing it.
 
 ```sh
-nuthatch init --from https://github.com/nuthatch-org/graph-allocations-nest
+nuthatch init --from https://github.com/nightswatchhq/graph-allocations-nest
 nuthatch dev --dir graph-allocations-nest --rpc https://your-archive-rpc --state-rpc https://your-archive-rpc --window 81920 --seal-direct
 nuthatch sql --dir graph-allocations-nest "SELECT * FROM port_queue WHERE net_signal > 1000"
 ```
@@ -23,10 +23,10 @@ first figure would make the backfill 256 times longer.
   wants (RFC-0011), served from events rather than the gateway. **Verified against the network
   subgraph at block 510,395,917: the same 14,415 active allocations, matched by allocation ID**
   ([verification/2026-09-30](verification/2026-09-30/README.md), with the commands to rerun it).
-- **`lodestar_epochs`** / **`epoch_boundaries`** - per-epoch rewards, fees and signal. Every
-  block is placed in its epoch by its own L1 block number (`[extract] l1_blocks`) and EpochManager's
-  arithmetic, so the view keeps up by itself; the header of `views/50-lodestar-epochs.sql` says why
-  computing it in L2 blocks is wrong by a factor of 48 on Arbitrum.
+- **`lodestar_epochs`** / **`epoch_boundaries`** - per-epoch rewards, fees and signal. Max epoch
+  **1,356, matching the network subgraph exactly**. Boundaries are *observed* from the `currentEpoch`
+  the events themselves carry, not computed - see the header of `views/50-lodestar-epochs.sql` for
+  why computing it is wrong by a factor of 48 on Arbitrum.
 - **`lodestar_disputes`** - the dispute lifecycle, with `Undecided` falling out of a LEFT JOIN rather
   than needing a status on chain.
 - **`lodestar_escrow_transactions`** - PaymentsEscrow money movements in Lodestar's `PaymentsTx`
@@ -36,7 +36,7 @@ first figure would make the backfill 256 times longer.
   subgraph-only rows. The nest-only rows are `EscrowCollected` events where **`payer == collector`**,
   one address collecting from itself, which the subgraph drops. Two further nest rows are `Thaw` and
   `CancelThaw`, types the subgraph's entity does not model at all. See
-  nuthatch-org/nuthatch#1114.
+  nightswatchhq/nuthatch#1114.
 - **`lodestar_indexer_deployment_daily`** / **`lodestar_indexer_daily`** - rewards and query fees per indexer,
   deployment and UTC day, and the per-indexer sum. Rewards split between the indexer and its delegators; fees
   taken apart as `GraphPayments` takes them, so `fees_net` is what the indexer received (checked against 1,990

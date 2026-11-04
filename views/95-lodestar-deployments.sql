@@ -10,8 +10,6 @@
 -- signal, whichever came first; the subgraph dates it from its first appearance the same way.
 -- `active_allocation_count` and `curator_count` are the lengths the gateway path counted (the latter
 -- counting exited positions too, as the subgraph's list does).
--- `denied_since` is the latest RewardsManager denylist update's sinceBlock. An update with zero
--- clears denial; an allocation-level RewardsDenied event cannot answer deployment eligibility.
 CREATE VIEW lodestar_deployments AS
 WITH signal AS (
   SELECT dep, SUM(tok) AS signalled_tokens, MIN(ts) AS first_ts FROM (
@@ -42,14 +40,6 @@ curators AS (
   -- every position ever, exited ones included: that is the length of the subgraph's `curatorSignals`
   SELECT LOWER(subgraph_deployment) AS dep, COUNT(*) AS curator_count FROM lodestar_curator_signals GROUP BY 1
 ),
-denylist AS (
-  SELECT dep, since_block FROM (
-    SELECT LOWER("subgraphDeploymentID") AS dep,
-           CAST("sinceBlock" AS BIGINT) AS since_block,
-           ROW_NUMBER() OVER (PARTITION BY LOWER("subgraphDeploymentID") ORDER BY block_number DESC, log_index DESC) AS rank
-    FROM rewards__rewards_denylist_updated
-  ) WHERE rank = 1
-),
 deps AS (SELECT dep FROM signal UNION SELECT dep FROM allocs)
 SELECT d.dep                                          AS id,
        COALESCE(s.signalled_tokens, 0)                AS signalled_tokens,
@@ -57,11 +47,9 @@ SELECT d.dep                                          AS id,
        COALESCE(f.query_fees_amount, 0)               AS query_fees_amount,
        LEAST(COALESCE(s.first_ts, 9223372036854775807), COALESCE(a.first_ts, 9223372036854775807)) AS created_at,
        COALESCE(a.active_allocation_count, 0)         AS active_allocation_count,
-       COALESCE(c.curator_count, 0)                   AS curator_count,
-       NULLIF(dl.since_block, 0)                     AS denied_since
+       COALESCE(c.curator_count, 0)                   AS curator_count
 FROM deps d
 LEFT JOIN signal s ON s.dep = d.dep
 LEFT JOIN fees f ON f.dep = d.dep
 LEFT JOIN allocs a ON a.dep = d.dep
-LEFT JOIN curators c ON c.dep = d.dep
-LEFT JOIN denylist dl ON dl.dep = d.dep;
+LEFT JOIN curators c ON c.dep = d.dep;

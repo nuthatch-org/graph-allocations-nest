@@ -18,7 +18,7 @@
 -- exact, because L1 numbers never decrease along L2, so every row of the nest falls in the epoch its
 -- own block's L1 number says. `start_l1_block` and `end_l1_block` are the epoch's exact L1 range,
 -- the numbers the network subgraph reports as `startBlock` and `endBlock`. See
--- nuthatch-org/nuthatch#1116 and #1882.
+-- nightswatchhq/nuthatch#1116 and #1882.
 CREATE VIEW epoch_boundaries AS
 WITH length_updates AS (
   SELECT CAST(u.epoch AS HUGEINT) AS e0, CAST(u."epochLength" AS HUGEINT) AS len,

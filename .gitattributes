@@ -1,3 +1,0 @@
-# GitHub language bar: a nest is its SQL. Hidden, so it is outside the data identity.
-*.sql linguist-detectable
-abis/** linguist-generated
