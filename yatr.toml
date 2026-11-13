@@ -23,7 +23,7 @@ run = [
     "nuthatch schema",
     "git diff --exit-code -- schema.json llms.txt semantic.toml",
 ]
-sources = ["nuthatch.toml", "abis/**/*.json", "schema.json", "semantic.toml"]
+sources = ["nuthatch.toml", "abis/**/*.json", "schema.json", "llms.txt", "semantic.toml"]
 
 [tasks.doctor]
 desc = "Probe the configured RPC endpoints for getLogs width and archive depth"
